@@ -1,7 +1,6 @@
 #ifndef BTREE_H
 #define BTREE_H
 #define MAX_KEYS 4
-// tree DE sequence DO 4
 
 typedef struct knot {
     int total;

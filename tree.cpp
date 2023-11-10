@@ -136,18 +136,15 @@ void merge(BTree* tree, Knot* knot, int index) {
     Knot* left = knot->children[index];
     Knot* right = knot->children[index + 1];
 
-    // Move a key father[index] do nó atual para o nó da left
     left->key[left->total] = knot->key[index];
     left->total++;
 
-    // Copia as key e children da right para a left
     for (i = 0; i < right->total; i++) {
         left->key[left->total] = right->key[i];
         left->children[left->total] = right->children[i];
         left->total++;
     }
 
-    // Atualiza os children da right no nó atual
     for (i = index; i < knot->total - 1; i++) {
         knot->key[i] = knot->key[i + 1];
         knot->children[i + 1] = knot->children[i + 2];
@@ -174,9 +171,7 @@ void remove_recursive(BTree* tree, Knot* knot, int key) {
     }
 
     if (index < knot->total && knot->key[index] == key) {
-        // A key está presente knot nó atual
         if (knot->children[index] != NULL) {
-            // Se o nó tem children à left, substitua a key pela maior key no son à left
             Knot* pred = knot->children[index];
             while (pred->children[pred->total] != NULL) {
                 pred = pred->children[pred->total];
@@ -185,20 +180,15 @@ void remove_recursive(BTree* tree, Knot* knot, int key) {
             knot->key[index] = predecessor;
             remove_recursive(tree, pred, predecessor);
         } else {
-            // Se o nó não tem children, simplesmente remova a key
             remove_key(knot, key, index);
         }
     } else {
-        // A key não está no nó atual, então desça para o son apropriado
         Knot* son = knot->children[index];
         if (son == NULL) {
-            // A key não está na árvore, saia
             return;
         }
         if (son->total == MAX_KEYS) {
-            // Se o son tiver o número mínimo de key, tente equilibrá-lo
             if (index > 0 && knot->children[index - 1]->total > MAX_KEYS) {
-                // Se o son à left tiver key extras, empreste uma key do father
                 for (i = son->total; i > 0; i--) {
                     son->key[i] = son->key[i - 1];
                 }
@@ -213,7 +203,6 @@ void remove_recursive(BTree* tree, Knot* knot, int key) {
                 knot->children[index - 1]->total--;
                 son->total++;
             } else if (index < knot->total && knot->children[index + 1]->total > MAX_KEYS) {
-                // Se o son à right tiver key extras, empreste uma key do father
                 son->key[son->total] = knot->key[index];
                 if (son->children[0] != NULL) {
                     son->children[son->total + 1] = knot->children[index + 1]->children[0];
@@ -230,7 +219,6 @@ void remove_recursive(BTree* tree, Knot* knot, int key) {
                 knot->children[index + 1]->total--;
                 son->total++;
             } else {
-                // Nenhum dos children tem key extras, então funda-os
                 if (index > 0) {
                     merge(tree, knot, index - 1);
                     index--;
@@ -240,7 +228,6 @@ void remove_recursive(BTree* tree, Knot* knot, int key) {
                 remove_recursive(tree, knot->children[index], key);
             }
         } else {
-            // O son tem espaço suficiente, continue a remoção recursiva
             remove_recursive(tree, son, key);
         }
     }
@@ -249,7 +236,6 @@ void remove_recursive(BTree* tree, Knot* knot, int key) {
 void remove_key_tree(BTree* tree, int key) {
     Knot* root = tree->root;
 
-    // Caso especial: se a root for a única key e for igual à key que estamos tentando remove
     if (root->total == 1 && root->key[0] == key) {
         tree->root = root->children[0];
         free(root);
@@ -264,7 +250,6 @@ void remove(BTree* tree, int key) {
     }
     remove_key_tree(tree, key);
 
-    // Se a root não tiver key, torne o son restante a nova root
     if (tree->root->total == 0) {
         Knot* new__root = tree->root->children[0];
         free(tree->root);
@@ -281,7 +266,7 @@ void print2D_functional(Knot *knot, int space, int parent_key) {
     printf("\n");
     for (i = 10; i < space; i++)
         printf(" ");
-    if (space > 10) // Não imprime a key do father para a root
+    if (space > 10)
         printf("(father: %d) ", parent_key);
     printf("[");
     for(i = 0; i < knot->total; i++) {
